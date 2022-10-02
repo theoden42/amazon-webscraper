@@ -1,21 +1,25 @@
 const axios = require("axios");
 const { parse } = require("node-html-parser");
+const { JSDOM } = require("jsdom")
 const cheerio = require('cheerio');
 
+const getProductURL = (productid) => `https://www.amazon.in/gp/product/ajax/?asin=${productid}&m=&smid=A3S6IT2E3YMO1K&sourcecustomerorglistid=&sourcecustomerorglistitemid=&sr=&pc=dp&experienceId=aodAjaxMain`;
 
 
-const scrape = async (url) => {
-  let data = await axios.get(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36"
-    }
-  });
+async function getPriceofProduct(productid){
+    const producturl = getProductURL(productid);
+    const { data: html} = await axios.get(producturl);
+    //   headers: {
+    //     Host: 'www.amazon.com',
+    //     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+    //     Pragma: 'no-cache',
+    //     TE: 'Trailers', 
+    //     'Upgrade-Insecure-Requests': 1
+    //   },
+    // }
+    
+    const dom = new JSDOM(html);
+    console.log(dom.window.document.querySelector('.a-price .a-offscreen').textContent);
+}
 
-  const res = parse(data.data)
-  console.log(res) 
-};
-
-scrape(
-    "https://www.amazon.in/Cheetos-Masala-Balls-32g/dp/B016KNUF7I/ref=sr_1_1?crid=1DY4KWJUZ9F4P&keywords=cheetos&qid=1662920314&sprefix=cheeto%2Caps%2C613&sr=8-1"
-);
+getPriceofProduct("B01G5AEA18");
